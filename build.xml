@@ -1,0 +1,58 @@
+<project name="model-test" default="test" basedir=".">
+  <description>
+    project description
+  </description>
+
+  <property file="project.properties" />
+
+  <import file="plugins/build.xml" as="phases" />
+
+  <target name="tar" description="tar files" depends="resolve">
+
+    <property name="destFileName" value="jpt-plugins" />
+    <!--
+    <delete file="${dist.dir}/${destFileName}-${ivy.revision}.tar" />
+    <delete file="${dist.dir}/${destFileName}-${ivy.revision}.tar.gz" />
+    <delete file="${dist.dir}/${destFileName}-${ivy.revision}.tar.gz.MD5" />
+    <delete file="${dist.dir}/${destFileName}-${ivy.revision}.tar.gz.SHA" />
+    -->
+    <echo>${dist.dir}/${destFileName}-${ivy.revision}.*</echo>
+    <delete>
+      <fileset dir="${dist.dir}" includes="${destFileName}-${ivy.revision}.*" />
+      <fileset dir="${dist.dir}" includes="${destFileName}.*" />
+    </delete>
+
+    <tar destfile="${dist.dir}/${destFileName}-${ivy.revision}.tar"
+         longfile="gnu" defaultexcludes="no">
+      <tarfileset dir="${basedir}" prefix="${destFileName}-${ivy.revision}"
+                  preserveLeadingSlashes="true">
+        <include name="plugins/**" />
+      </tarfileset>
+    </tar>
+    <tar destfile="${dist.dir}/${destFileName}.tar"
+         longfile="gnu" defaultexcludes="no">
+      <tarfileset dir="${basedir}" prefix="${destFileName}"
+                  preserveLeadingSlashes="true">
+        <include name="plugins/**" />
+      </tarfileset>
+    </tar>
+
+    <gzip destfile="${dist.dir}/${destFileName}-${ivy.revision}.tar.gz"
+          src="${dist.dir}/${destFileName}-${ivy.revision}.tar"/>
+    <gzip destfile="${dist.dir}/${destFileName}.tar.gz"
+          src="${dist.dir}/${destFileName}.tar"/>
+
+    <delete>
+      <fileset dir="${dist.dir}" includes="*.tar" />
+    </delete>
+
+    <checksum file="${dist.dir}/${destFileName}-${ivy.revision}.tar.gz" />
+    <checksum file="${dist.dir}/${destFileName}-${ivy.revision}.tar.gz"
+              algorithm="SHA" />
+    <checksum file="${dist.dir}/${destFileName}.tar.gz" />
+    <checksum file="${dist.dir}/${destFileName}.tar.gz"
+              algorithm="SHA" />
+  </target>
+
+
+</project>
