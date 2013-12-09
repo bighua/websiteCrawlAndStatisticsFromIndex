@@ -69,4 +69,11 @@ public class Util {
         }
     }
     
+    public static void outputFile(String dir, String fileName) {
+    	
+    }
+    
+    public static void readFile(String dir, String fileName) {
+    	
+    }
 }
