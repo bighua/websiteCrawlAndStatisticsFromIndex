@@ -8,6 +8,7 @@ import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 
 import com.jcm.statistics.Util;
+import com.jcm.statistics.cache.Cache;
 
 public class Model extends BaseData {
 

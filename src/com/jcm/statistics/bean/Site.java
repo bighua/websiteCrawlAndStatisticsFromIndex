@@ -11,6 +11,7 @@ import org.apache.solr.client.solrj.response.PivotField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 
 import com.jcm.statistics.Util;
+import com.jcm.statistics.cache.Cache;
 
 public class Site extends BaseData {
 
@@ -51,6 +52,8 @@ public class Site extends BaseData {
                 BaseData m = new Model();
                 String[] modelInfo = line.split(",");
                 m.setCount(modelInfo[0], Long.valueOf(modelInfo[1]));
+                // 读入缓存的数据为clean的
+                m.setPolluted(false);
             }
         }
     }

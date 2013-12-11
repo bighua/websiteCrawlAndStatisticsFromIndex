@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.solr.client.solrj.response.QueryResponse;
 
 import com.jcm.statistics.Util;
+import com.jcm.statistics.cache.Cache;
 
 public abstract class BaseData {
 
@@ -57,6 +58,10 @@ public abstract class BaseData {
 
     public boolean isPolluted() {
         return isPolluted;
+    }
+    
+    public void setPolluted(boolean polluted) {
+        this.isPolluted = polluted;
     }
 
     public void setDateTime(String dateTime) {

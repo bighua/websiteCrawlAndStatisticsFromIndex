@@ -1,14 +1,9 @@
 package com.jcm.statistics;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -18,8 +13,7 @@ import com.jcm.solrj.ext.TableAccessor;
 import com.jcm.solrj.ext.query.QueryParams;
 import com.jcm.solrj.ext.query.params.FacetingParamsComp;
 import com.jcm.statistics.bean.BaseData;
-import com.jcm.statistics.bean.Cache;
-import com.jcm.statistics.bean.Model;
+import com.jcm.statistics.cache.Cache;
 import com.jcraft.jsch.JSchException;
 
 public class Statistics {
@@ -35,12 +29,16 @@ public class Statistics {
         
         try {
             // TODO 定时执行
-            long begin = System.currentTimeMillis();
-            String now = Util.getRemoteTime().replaceAll("\n", "");
             
             SolrDb sd = new SolrDb(Util.p.getProperty("solr_server"));
             String[] types = Util.p.getProperty("table").split("/");
             String[] dimension = Util.p.getProperty("dimension").split("/");
+            Long interval = Long.valueOf(Util.p.getProperty("interval"));
+            int times = 3;
+            while (times-- > 0) {
+            long begin = System.currentTimeMillis();
+            String now = Util.getRemoteTime().replaceAll("\n", "");
+            System.out.println("get log at " + now);
             Statistics st = new Statistics(types, dimension);
             for (String d : dimension) {
                 String[] cols = Util.p.getProperty("col_" + d).split("/");
@@ -52,9 +50,8 @@ public class Statistics {
                     }
                     QueryParams params = new QueryParams();
                     params.setRows(0);
-                    if (i < cols.length) {
+                    if (!"".equals(col)) {
                         if (col.indexOf(",") > 0) {
-    
                             params.addParameter("facet", "true");
                             params.addParameter("facet.pivot", col);
                             params.addParameter("indent", "true");
@@ -69,9 +66,12 @@ public class Statistics {
                     // TODO time check?
                     st.outputData(now, t, qr, col, d);
                 }
-                System.out.println("this process cost " + (System.currentTimeMillis() - begin) + "ms");
             }
-            System.out.println();
+            long cost = System.currentTimeMillis() - begin;
+            System.out.println("this process cost " + (System.currentTimeMillis() - begin) + "ms");
+            System.out.println("execute every " + interval + "ms, so sleep " + (interval - cost));
+            Thread.sleep(interval - cost);
+            }
         } catch (IOException |  JSchException | InterruptedException | SolrServerException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             // TODO exception handle
             e.printStackTrace();
@@ -82,7 +82,8 @@ public class Statistics {
     public void outputData(String dt, String type, QueryResponse qr, String tableCol, String dimension) 
             throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
         BufferedWriter writer = null;
-        String ouputDir = Util.p.getProperty("dir_output");
+        // xx/xx/2013
+        String ouputDir = Util.p.getProperty("dir_output") + dt.substring(0, 4);
         try {
             String cacheKey = type + "_" + dimension;
             BaseData data = (BaseData)cache.get(cacheKey, dimension);
@@ -113,7 +114,8 @@ public class Statistics {
                 data.setDataSize(sb.length() * 2 + head.getBytes().length);
             } else {
                 // 不需要更新：标志串，文件版本号，偏移量
-                writer.write(Util.NO_UPDATE + data.getVersion());
+                writer.write(Util.NO_UPDATE + "," + data.getVersion());
+                writer.newLine();
             }
             writer.flush();
             writer.close();
@@ -126,20 +128,4 @@ public class Statistics {
         }
     }
     
-    /**
-     * 读取1个自然日的统计数据
-     */
-    public List<Model> readDailyData(String date, String type, String dimension) throws IOException {
-
-        BufferedReader br = null;
-        String ouputDir = Util.p.getProperty("dir_output");
-        
-        int version = 0;
-        while (true) {
-	        File f = new File(ouputDir, type + "_" + dimension + date + "_" + version);
-	        if (f.exists()) {
-		        br = new BufferedReader(new FileReader(f));
-	        }
-        }
-    }
 }

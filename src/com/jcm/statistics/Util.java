@@ -17,6 +17,8 @@ public class Util {
 	
 	public static String LINE_SEPARATOR = System.getProperty("line.separator");
 	
+	public static String BEAN_PACKAGE = "com.jcm.statistics.bean.";
+	
     public static Properties p = new Properties();
     static {
         InputStream inputStream  = Util.class.getClassLoader().getResourceAsStream("conf/jcm.properties");
@@ -89,7 +91,7 @@ public class Util {
 			className = d.substring(0, d.indexOf("_"));
 		}
 		// 利用反射获取处理类实例
-		BaseData bd = (BaseData)Class.forName("com.jcm.statistics.bean." + className).newInstance();
+		BaseData bd = (BaseData)Class.forName(BEAN_PACKAGE + className).newInstance();
 		return bd;
 	}
 }

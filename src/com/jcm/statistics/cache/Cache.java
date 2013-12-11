@@ -1,4 +1,4 @@
-package com.jcm.statistics.bean;
+package com.jcm.statistics.cache;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.jcm.statistics.Util;
+import com.jcm.statistics.bean.BaseData;
 
 public class Cache {
 
@@ -66,6 +67,7 @@ public class Cache {
                     data.setVersion(Integer.valueOf(items[i++]));
                     data.setDataSize(Long.valueOf(items[i++]));
                     data.readIntoCache(br);
+                    data.setPolluted(false);
                     br.close();
                 }
                 cache.put(cacheName, data);
