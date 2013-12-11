@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.jcm.statistics.bean.BaseData;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
@@ -12,6 +13,10 @@ import com.jcraft.jsch.Session;
 
 public class Util {
 
+	public static String NO_UPDATE = "_NU_";
+	
+	public static String LINE_SEPARATOR = System.getProperty("line.separator");
+	
     public static Properties p = new Properties();
     static {
         InputStream inputStream  = Util.class.getClassLoader().getResourceAsStream("conf/jcm.properties");
@@ -76,4 +81,15 @@ public class Util {
     public static void readFile(String dir, String fileName) {
     	
     }
+	
+	public static BaseData getInstance(String d) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+
+		String className = d;
+		if (d.indexOf("_") > 0) {
+			className = d.substring(0, d.indexOf("_"));
+		}
+		// 利用反射获取处理类实例
+		BaseData bd = (BaseData)Class.forName("com.jcm.statistics.bean." + className).newInstance();
+		return bd;
+	}
 }
