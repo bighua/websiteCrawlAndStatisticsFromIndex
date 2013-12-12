@@ -64,6 +64,6 @@ public abstract class BaseData {
         isPolluted = false;
     }
     
-    public abstract void createData(QueryResponse qr, String tableCol, Cache cache, String dimension, StringBuffer sb) throws IOException;
+    public abstract int createData(QueryResponse qr, String tableCol, Cache cache, String dimension, StringBuffer sb) throws IOException;
 
 }

@@ -10,7 +10,7 @@ import com.jcm.statistics.cache.Cache;
 
 public class Model extends BaseData {
 
-    public void createData(QueryResponse qr, String tableCol, Cache cache, String dimension, StringBuffer sb) {
+    public int createData(QueryResponse qr, String tableCol, Cache cache, String dimension, StringBuffer sb) {
 
         List<Count> lc = qr.getFacetField(tableCol).getValues();
         for (Count c : lc) {
@@ -27,6 +27,7 @@ public class Model extends BaseData {
                 setCount(model, count);
 //            }
         }
+        return lc.size();
     }
     
 }

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import com.jcm.statistics.bean.BaseData;
+import com.jcm.statistics.data.Data;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
@@ -20,7 +21,9 @@ public class Util {
     
     public static String BEAN_PACKAGE = "com.jcm.statistics.bean.";
     
-    public static String START_FLG = "_S_";
+    public static String DATA_PACKAGE = "com.jcm.statistics.data.";
+    
+    public static String START_FLG = "_S_" + LINE_SEPARATOR;
 
     public static Properties p = new Properties();
     
@@ -90,6 +93,17 @@ public class Util {
         // 利用反射获取处理类实例
         BaseData bd = (BaseData)Class.forName(BEAN_PACKAGE + className).newInstance();
         return bd;
+    }
+    
+    public static Data getDataInstance(String d) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+
+        String className = d;
+        if (d.indexOf("_") > 0) {
+            className = d.substring(0, d.indexOf("_"));
+        }
+        // 利用反射获取处理类实例
+        Data data = (Data)Class.forName(DATA_PACKAGE + className).newInstance();
+        return data;
     }
     
     public static int getVersion(String prefix) {

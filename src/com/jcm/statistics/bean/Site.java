@@ -31,11 +31,13 @@ public class Site extends BaseData {
         }
     }
 
-    public void createData(QueryResponse qr, String tableCol, Cache cache, String dimension, StringBuffer sb) {
+    public int createData(QueryResponse qr, String tableCol, Cache cache, String dimension, StringBuffer sb) {
 
+        int subCount = 0;
         if (tableCol.indexOf(",") > 0) {
             // "sitename,urlmodelcom"
             List<PivotField> lp = qr.getFacetPivot().get(tableCol);
+            subCount = lp.size();
             for (PivotField pf : lp) {
                 String sitename = pf.getValue().toString();
                 int siteCount = pf.getCount();
@@ -78,6 +80,7 @@ public class Site extends BaseData {
             }
         } else {
             List<Count> lc = qr.getFacetField(tableCol).getValues();
+            subCount = lc.size();
             for (Count c : lc) {
                 String site = c.getName();
                 long count = c.getCount();
@@ -91,5 +94,6 @@ public class Site extends BaseData {
                 setCount(site, count);
             }
         }
+        return subCount;
     }
 }

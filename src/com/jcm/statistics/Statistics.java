@@ -99,16 +99,19 @@ public class Statistics {
                     d.mkdirs();
                 }
                 long vol = 0L;
-                // 头数据：时间，总量，增量
-                String head = dt + "," + totalCount + "," + totalInc + Util.LINE_SEPARATOR;
-                vol += head.getBytes().length;
+                String head = "";
                 StringBuffer body = new StringBuffer();
+                int subCount = 0;
                 if (!"".equals(tableCol)) {
-                    data.createData(qr, tableCol, cache, dimension, body);
+                    subCount = data.createData(qr, tableCol, cache, dimension, body);
                 }
                 if (!data.isPolluted()) {
                     // 不需要更新：标志串，文件版本号，偏移量
                     body = new StringBuffer(Util.NO_UPDATE).append(Util.LINE_SEPARATOR);
+                } else {
+                    // 头数据：时间，总量，增量，子分类个数
+                    head = dt + "," + totalCount + "," + totalInc + "," + subCount + Util.LINE_SEPARATOR;
+                    vol += head.getBytes().length;
                 }
                 vol += body.length() * 2;
                 // 文件名:news_site_model_20131210_0
