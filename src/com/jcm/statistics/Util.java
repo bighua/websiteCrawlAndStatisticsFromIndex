@@ -13,13 +13,17 @@ import com.jcraft.jsch.Session;
 
 public class Util {
 
-	public static String NO_UPDATE = "_NU_";
-	
-	public static String LINE_SEPARATOR = System.getProperty("line.separator");
-	
-	public static String BEAN_PACKAGE = "com.jcm.statistics.bean.";
-	
+    public static String NO_UPDATE = "_NU_";
+    
+    public static String LINE_SEPARATOR = System.getProperty("line.separator");
+    
+    public static String BEAN_PACKAGE = "com.jcm.statistics.bean.";
+    
+    public static String START_FLG = "_S_";
+
     public static Properties p = new Properties();
+    
+    
     static {
         InputStream inputStream  = Util.class.getClassLoader().getResourceAsStream("conf/jcm.properties");
         try {
@@ -76,22 +80,14 @@ public class Util {
         }
     }
     
-    public static void outputFile(String dir, String fileName) {
-    	
-    }
-    
-    public static void readFile(String dir, String fileName) {
-    	
-    }
-	
-	public static BaseData getInstance(String d) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+    public static BaseData getInstance(String d) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 
-		String className = d;
-		if (d.indexOf("_") > 0) {
-			className = d.substring(0, d.indexOf("_"));
-		}
-		// 利用反射获取处理类实例
-		BaseData bd = (BaseData)Class.forName(BEAN_PACKAGE + className).newInstance();
-		return bd;
-	}
+        String className = d;
+        if (d.indexOf("_") > 0) {
+            className = d.substring(0, d.indexOf("_"));
+        }
+        // 利用反射获取处理类实例
+        BaseData bd = (BaseData)Class.forName(BEAN_PACKAGE + className).newInstance();
+        return bd;
+    }
 }

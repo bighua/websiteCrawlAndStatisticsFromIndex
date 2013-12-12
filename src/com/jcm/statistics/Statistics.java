@@ -26,6 +26,8 @@ public class Statistics {
     
     private SolrDb sd = null;
     
+    private String startFlg = Util.START_FLG;
+    
     public Statistics() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
         // 缓存初期化
         String[] types = Util.p.getProperty("table").split("/");
@@ -38,11 +40,9 @@ public class Statistics {
     }
     
     class TimerStatistics extends TimerTask {
-        int times = 2;
+
         public void run() {
             try {
-//                if (times-- == 0) 
-                    timer.cancel();
                 String[] types = Util.p.getProperty("table").split("/");
                 String[] dimension = Util.p.getProperty("dimension").split("/");
                 String now = Util.getRemoteTime().replaceAll("\n", "");
@@ -73,10 +73,10 @@ public class Statistics {
                         outputData(now, t, qr, col, d);
                     }
                 }
+                startFlg = "";
             } catch (IOException |  JSchException | InterruptedException | SolrServerException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                // TODO exception handle
                 e.printStackTrace();
-                System.out.println("exception happens when execution, process exit!");
+                System.out.println("exception happens in execution, process exit!");
                 timer.cancel();
             }
         }
@@ -104,6 +104,7 @@ public class Statistics {
                 // 头数据：时间，总量，增量
                 String head = dt + "," + totalCount + "," + totalInc;
                 writer = new BufferedWriter(new FileWriter(f, true));
+                writer.write(startFlg);
                 writer.write(head);
                 writer.newLine();
                 if (!"".equals(tableCol)) {
@@ -138,8 +139,5 @@ public class Statistics {
             System.out.println("error occurs when prepare the cache.");
             e.printStackTrace();
         }
-        
     }
-    
-    
 }

@@ -26,10 +26,6 @@ public class Site extends BaseData {
         return m;
     }
 
-//    public void setSiteModel(String sm, BaseData m) {
-//        siteModel.put(sm, m);
-//    }
-
     public void writeFromCache(StringBuffer sb) {
         for (String key : dataCount.keySet()) {
             sb.append(key).append(",").append(dataCount.get(key)).append(",");
@@ -64,7 +60,6 @@ public class Site extends BaseData {
             // "sitename,urlmodelcom"
             List<PivotField> lp = qr.getFacetPivot().get(tableCol);
             for (PivotField pf : lp) {
-                // sitename
                 String sitename = pf.getValue().toString();
                 int siteCount = pf.getCount();
                 sb.append(sitename).append(",");

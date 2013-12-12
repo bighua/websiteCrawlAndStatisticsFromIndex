@@ -17,7 +17,7 @@ public class Cache {
     /**
      * news_model,img_site_model,video_site,praise_site
      */
-    protected Map<String, BaseData> cache = new HashMap<String, BaseData>();
+    private Map<String, BaseData> cache = new HashMap<String, BaseData>();
     
     /**
      * model:id pair
@@ -45,7 +45,7 @@ public class Cache {
     
     private void init(String[] types, String dimension) throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
         String[] models = new String(Util.p.getProperty("models").getBytes("ISO8859-1"), "UTF-8").split(",");
-        String dir = Util.p.getProperty("dir");
+        String dir = Util.p.getProperty("dir_output");
         for (int i = 0; i < models.length; i++) {
             modelId.put(models[i], Long.valueOf(models[++i]));
         }
@@ -81,7 +81,7 @@ public class Cache {
     }
 
     public void writeFromCache(String key, long availableSize) throws IOException {
-        String dir = Util.p.getProperty("dir");
+        String dir = Util.p.getProperty("dir_output");
         BaseData data = cache.get(key);
         if (availableSize < data.getDataSize()) {
             data.setVersion(data.getVersion() + 1);
