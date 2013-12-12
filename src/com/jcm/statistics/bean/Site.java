@@ -85,7 +85,7 @@ public class Site extends BaseData {
                 if (models != null) {
                     for (PivotField subData : models) {
                         // model name
-                        String model = subData.getValue().toString();
+                        String model = subData.getValue().toString().trim();
 //                        // 不存在的车型不统计
 //                        if (cache.getId(model) != null) {
                             int count = subData.getCount();

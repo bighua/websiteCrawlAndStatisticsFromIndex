@@ -30,7 +30,7 @@ public class Model extends BaseData {
 
         List<Count> lc = qr.getFacetField(tableCol).getValues();
         for (Count c : lc) {
-            String model = c.getName();
+            String model = c.getName().trim();
             long count = c.getCount();
 //            if (cache.getId(model) != null) {
                 // 车型名

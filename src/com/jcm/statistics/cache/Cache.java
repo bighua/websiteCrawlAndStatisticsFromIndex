@@ -67,6 +67,7 @@ public class Cache {
                     data.setVersion(Integer.valueOf(items[i++]));
                     data.setDataSize(Long.valueOf(items[i++]));
                     data.readIntoCache(br);
+                    // 读入缓存的数据为clean的
                     data.setPolluted(false);
                     br.close();
                 }
@@ -85,7 +86,11 @@ public class Cache {
         if (availableSize < data.getDataSize()) {
             data.setVersion(data.getVersion() + 1);
         }
-        if (!data.isPolluted()) return;
+        if (!data.isPolluted()) {
+            return;
+        } else {
+            data.setPolluted(false);
+        }
         // 缓存文件更新
         BufferedWriter writer = null;
         try {
