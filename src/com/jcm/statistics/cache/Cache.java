@@ -1,10 +1,5 @@
 package com.jcm.statistics.cache;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +12,9 @@ public class Cache {
     /**
      * news_model,img_site_model,video_site,praise_site
      */
-    private Map<String, BaseData> cache = new HashMap<String, BaseData>();
+    private Map<String, BaseData> baseData = new HashMap<String, BaseData>();
+    
+    private Map<String, Integer> version = new HashMap<String, Integer>();
     
     /**
      * model:id pair
@@ -31,10 +28,10 @@ public class Cache {
     }
     
     public BaseData get(String key, String dimension) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-        BaseData m = cache.get(key);
+        BaseData m = baseData.get(key);
         if (m == null) {
             m = Util.getInstance(dimension);
-            cache.put(key, m);
+            baseData.put(key, m);
         }
         return m;
     }
@@ -43,74 +40,28 @@ public class Cache {
         return modelId.get(model);
     }
     
+    public int getVersion(String key) {
+        Integer ver = version.get(key);
+        if (ver == null) {
+            ver = Util.getVersion(key);
+            version.put(key, ver);
+        }
+        return ver;
+    }
+    
+    public void setVersion(String key, int ver) {
+        version.put(key, ver);
+    }
+    
+    public void resetPollutedFlg(String key) {
+        BaseData data = baseData.get(key);
+        data.resetPolluted();
+    }
+    
     private void init(String[] types, String dimension) throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
         String[] models = new String(Util.p.getProperty("models").getBytes("ISO8859-1"), "UTF-8").split(",");
-        String dir = Util.p.getProperty("dir_output");
         for (int i = 0; i < models.length; i++) {
             modelId.put(models[i], Long.valueOf(models[++i]));
-        }
-        BufferedReader br = null;
-        try {
-            // 从本地缓存文件中读取数据到内存中
-            for (String t : types) {
-                String cacheName = t + "_" + dimension;
-                File f = new File(dir, cacheName);
-                String[] items = null;
-                BaseData data = Util.getInstance(dimension);
-                if (f.exists()) {
-                    br = new BufferedReader(new FileReader(f));
-                    items = br.readLine().split(",");
-                    // 头数据
-                    int i = 0;
-                    data.setDateTime(items[i++]);
-                    data.setTotal(Long.valueOf(items[i++]));
-                    data.setVersion(Integer.valueOf(items[i++]));
-                    data.setDataSize(Long.valueOf(items[i++]));
-                    data.readIntoCache(br);
-                    // 读入缓存的数据为clean的
-                    data.setPolluted(false);
-                    br.close();
-                }
-                cache.put(cacheName, data);
-            }
-        } finally {
-            if (br != null) {
-                br.close();
-            }
-        }
-    }
-
-    public void writeFromCache(String key, long availableSize) throws IOException {
-        String dir = Util.p.getProperty("dir_output");
-        BaseData data = cache.get(key);
-        if (availableSize < data.getDataSize()) {
-            data.setVersion(data.getVersion() + 1);
-        }
-        if (!data.isPolluted()) {
-            return;
-        } else {
-            data.setPolluted(false);
-        }
-        // 缓存文件更新
-        BufferedWriter writer = null;
-        try {
-            File d = new File(dir);
-            if (!d.exists()) {
-                d.mkdirs();
-            }
-            writer = new BufferedWriter(new FileWriter(new File(dir, key)));
-            StringBuffer sb = new StringBuffer();
-            // 时间,总数，文件版本号,单条数据大小
-            sb.append(data.getDateTime()).append(",").append(data.getTotal()).append(",").append(
-                    data.getVersion()).append(",").append(data.getDataSize()).append(Util.LINE_SEPARATOR);
-            // BaseData子类实现
-            data.writeFromCache(sb);
-            writer.write(sb.toString());
-            writer.flush();
-        } finally {
-            if (writer != null) {
-                writer.close();
-            }
         }
     }
 }

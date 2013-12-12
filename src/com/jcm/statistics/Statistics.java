@@ -98,32 +98,35 @@ public class Statistics {
                 if (!d.exists()) {
                     d.mkdirs();
                 }
-                StringBuffer sb = new StringBuffer();
-                // 文件名:news_site_model_20131210_0
-                File f = new File(ouputDir, cacheKey + "_" + dt.substring(0, 8) + "_" + data.getVersion());
+                long vol = 0L;
                 // 头数据：时间，总量，增量
-                String head = dt + "," + totalCount + "," + totalInc;
+                String head = dt + "," + totalCount + "," + totalInc + Util.LINE_SEPARATOR;
+                vol += head.getBytes().length;
+                StringBuffer body = new StringBuffer();
+                if (!"".equals(tableCol)) {
+                    data.createData(qr, tableCol, cache, dimension, body);
+                }
+                if (!data.isPolluted()) {
+                    // 不需要更新：标志串，文件版本号，偏移量
+                    body = new StringBuffer(Util.NO_UPDATE).append(Util.LINE_SEPARATOR);
+                }
+                vol += body.length() * 2;
+                // 文件名:news_site_model_20131210_0
+                String verKey = cacheKey + "_" + dt.substring(0, 8);
+                int version = cache.getVersion(verKey);
+                File f = new File(ouputDir, verKey + "_" + version);
+                long maxSize = Long.valueOf(Util.p.getProperty("maxsize"));
+                if ((maxSize - f.length()) < vol) {
+                    version++;
+                    f = new File(ouputDir, verKey + "_" + version);
+                    cache.setVersion(verKey, version);
+                }
                 writer = new BufferedWriter(new FileWriter(f, true));
                 writer.write(startFlg);
                 writer.write(head);
-                writer.newLine();
-                if (!"".equals(tableCol)) {
-                    data.createData(qr, tableCol, cache, dimension, sb);
-                }
-
-                if (data.isPolluted()) {
-                    writer.write(sb.toString());
-                    // (16-bit chars) * 2 = byte
-                    data.setDataSize(sb.length() * 2 + head.getBytes().length);
-                } else {
-                    // 不需要更新：标志串，文件版本号，偏移量
-                    writer.write(Util.NO_UPDATE + "," + data.getVersion());
-                    writer.newLine();
-                }
+                writer.write(body.toString());
                 writer.flush();
-                writer.close();
-                long maxSize = Long.valueOf(Util.p.getProperty("maxsize"));
-                cache.writeFromCache(cacheKey, maxSize - f.length());
+                cache.resetPollutedFlg(cacheKey);
             } finally {
                 if (writer != null) {
                     writer.close();

@@ -1,5 +1,6 @@
 package com.jcm.statistics;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -89,5 +90,13 @@ public class Util {
         // 利用反射获取处理类实例
         BaseData bd = (BaseData)Class.forName(BEAN_PACKAGE + className).newInstance();
         return bd;
+    }
+    
+    public static int getVersion(String prefix) {
+        int version = 0;
+        int i = prefix.lastIndexOf('_');
+        String dir = prefix.substring(i + 1, i + 5);
+        while (new File(p.getProperty("dir_output") + dir, prefix + "_" + version).exists()) version++;
+        return version == 0 ? 0 : --version;
     }
 }

@@ -1,7 +1,5 @@
 package com.jcm.statistics.bean;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,35 +23,14 @@ public class Site extends BaseData {
         }
         return m;
     }
+    
+    public void resetPolluted() {
+        super.resetPolluted();
+        for (BaseData m : siteModel.values()) {
+            m.setPolluted(false);
+        }
+    }
 
-    public void writeFromCache(StringBuffer sb) {
-        for (String key : dataCount.keySet()) {
-            sb.append(key).append(",").append(dataCount.get(key)).append(",");
-            Map<String, Long> m = getSiteModel(key).dataCount;
-            sb.append(m.size()).append(Util.LINE_SEPARATOR);
-            for (String mk : m.keySet()) {
-                sb.append(mk).append(",").append(m.get(mk)).append(Util.LINE_SEPARATOR);
-            }
-        }
-    }
-    
-    public void readIntoCache(BufferedReader br) throws NumberFormatException, IOException {
-        String line = "";
-        int subCount = 0;
-        while ((line = br.readLine()) != null) {
-            String[] siteInfo = line.split(",");
-            setCount(siteInfo[0], Long.valueOf(siteInfo[1]));
-            subCount = Integer.valueOf(siteInfo[2]);
-            while(subCount-- > 0 && (line = br.readLine()) != null) {
-                BaseData m = new Model();
-                String[] modelInfo = line.split(",");
-                m.setCount(modelInfo[0], Long.valueOf(modelInfo[1]));
-                // 读入缓存的数据为clean的
-                m.setPolluted(false);
-            }
-        }
-    }
-    
     public void createData(QueryResponse qr, String tableCol, Cache cache, String dimension, StringBuffer sb) {
 
         if (tableCol.indexOf(",") > 0) {
@@ -94,7 +71,7 @@ public class Site extends BaseData {
                             sb.append(System.getProperty("line.separator"));
                             m.setCount(model, count);
                             // 子数据更新污染父数据
-                            isPolluted &= m.isPolluted();
+                            isPolluted |= m.isPolluted();
 //                        }
                     }
                 }

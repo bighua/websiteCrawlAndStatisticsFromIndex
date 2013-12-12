@@ -1,13 +1,11 @@
 package com.jcm.statistics.bean;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
 
-import com.jcm.statistics.Util;
 import com.jcm.statistics.cache.Cache;
 
 public abstract class BaseData {
@@ -15,16 +13,6 @@ public abstract class BaseData {
     protected long total = 0;
     
     protected String dateTime = null;
-//    private String type = null;
-
-//    public void setType(String type) {
-//        this.type = type;
-//    }
-    
-    // 用于分割文件(200M上限)
-    protected int version = 0;
-    
-    protected long dataSize = Long.valueOf(Util.p.getProperty("maxsize"));
     
     protected boolean isPolluted = false;
 
@@ -72,25 +60,10 @@ public abstract class BaseData {
         return dateTime;
     }
 
-    public int getVersion() {
-        return version;
+    public void resetPolluted() {
+        isPolluted = false;
     }
-
-    public void setVersion(int version) {
-        this.version = version;
-    }
-
-    public void setDataSize(long dataSize) {
-        this.dataSize = dataSize;
-    }
-
-    public long getDataSize() {
-        return dataSize;
-    }
-
+    
     public abstract void createData(QueryResponse qr, String tableCol, Cache cache, String dimension, StringBuffer sb) throws IOException;
-    
-    public abstract void readIntoCache(BufferedReader br) throws NumberFormatException, IOException;
-    
-    public abstract void writeFromCache(StringBuffer sb);
+
 }
