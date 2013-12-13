@@ -17,7 +17,7 @@ public class Cache {
     private Map<String, Integer> version = new HashMap<String, Integer>();
     
     /**
-     * model:id pair
+     * 车型：车型ID
      */
     private Map<String, Long> modelId = new HashMap<String, Long>();
     
@@ -27,13 +27,13 @@ public class Cache {
         }
     }
     
-    public BaseData get(String key, String dimension) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-        BaseData m = baseData.get(key);
-        if (m == null) {
-            m = Util.getInstance(dimension);
-            baseData.put(key, m);
+    public BaseData getBaseData(String key) {
+        BaseData data = baseData.get(key);
+        if (data == null) {
+            data = new BaseData();
+            baseData.put(key, data);
         }
-        return m;
+        return data;
     }
     
     public Long getId(String model) {

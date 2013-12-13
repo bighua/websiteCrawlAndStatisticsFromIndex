@@ -1,22 +1,42 @@
 package com.jcm.statistics.bean;
 
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.apache.solr.client.solrj.response.PivotField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 
-import com.jcm.statistics.cache.Cache;
+import com.jcm.statistics.Util;
 
-public abstract class BaseData {
+public class BaseData {
 
-    protected long total = 0;
+	private long total = 0;
     
-    protected String dateTime = null;
+    private String dateTime = null;
     
-    protected boolean isPolluted = false;
+    private boolean isPolluted = false;
 
-    protected Map<String, Long> dataCount = new HashMap<String, Long>();
+    private Map<String, Long> dataCount = new HashMap<String, Long>();
+    
+    private Map<String, BaseData> subData = new HashMap<String, BaseData>();
+
+    public BaseData getSubData(String subName) {
+        BaseData data = subData.get(subName);
+        if (data == null) {
+            data = new BaseData();
+            subData.put(subName, data);
+        }
+        return data;
+    }
+
+    public void resetPolluted() {
+        isPolluted = false;
+        for (BaseData m : subData.values()) {
+            m.resetPolluted();
+        }
+    }
 
     public void setCount(String name, long count) {
         Long originalCount = dataCount.put(name, count);
@@ -60,10 +80,56 @@ public abstract class BaseData {
         return dateTime;
     }
 
-    public void resetPolluted() {
-        isPolluted = false;
-    }
-    
-    public abstract int createData(QueryResponse qr, String tableCol, Cache cache, String dimension, StringBuffer sb) throws IOException;
+    public int createData(QueryResponse qr, String tableCol, StringBuffer sb) {
 
+        int subCount = 0;
+        if (tableCol.indexOf(",") > 0) {
+            // facet.pivot
+            List<PivotField> lp = qr.getFacetPivot().get(tableCol);
+            subCount = lp.size();
+            createSubData(lp, sb);
+        } else {
+            // facet.field
+            List<Count> lc = qr.getFacetField(tableCol).getValues();
+            subCount = lc.size();
+            for (Count c : lc) {
+                String site = c.getName();
+                long count = c.getCount();
+                // site
+                sb.append(site).append(",");
+                // 总量
+                sb.append(count).append(",");
+                // 增量
+                sb.append(count - getCount(site));
+                sb.append(Util.LINE_SEPARATOR);
+                setCount(site, count);
+            }
+        }
+        return subCount;
+    }
+
+    private void createSubData(List<PivotField> lp, StringBuffer sb) {
+        
+        for (PivotField pf : lp) {
+            String name = pf.getValue().toString().trim();
+            int count = pf.getCount();
+            sb.append(name).append(",");
+            // 总量
+            sb.append(count).append(",");
+            // 增量
+            sb.append(count - getCount(name));
+            // 缓存数据更新
+            setCount(name, count);
+            List<PivotField> subData = pf.getPivot();
+            if (subData != null) {
+                sb.append(",").append(subData.size()).append(Util.LINE_SEPARATOR);
+                BaseData m = getSubData(name);
+                m.createSubData(subData, sb);
+                // 子数据更新污染父数据
+                isPolluted |= m.isPolluted();
+            } else {
+                sb.append(Util.LINE_SEPARATOR);
+            }
+        }
+    }
 }

@@ -73,7 +73,7 @@ public class Site extends BaseData {
                             sb.append(System.getProperty("line.separator"));
                             m.setCount(model, count);
                             // 子数据更新污染父数据
-                            isPolluted |= m.isPolluted();
+                            setPolluted(isPolluted() || m.isPolluted());
 //                        }
                     }
                 }

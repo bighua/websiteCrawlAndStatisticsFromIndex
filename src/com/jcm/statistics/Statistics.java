@@ -74,7 +74,7 @@ public class Statistics {
                     }
                 }
                 startFlg = "";
-            } catch (IOException |  JSchException | InterruptedException | SolrServerException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            } catch (IOException |  JSchException | InterruptedException | SolrServerException  e) {
                 e.printStackTrace();
                 System.out.println("exception happens in execution, process exit!");
                 timer.cancel();
@@ -82,13 +82,13 @@ public class Statistics {
         }
         
         public void outputData(String dt, String type, QueryResponse qr, String tableCol, String dimension) 
-                throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+                throws IOException {
             BufferedWriter writer = null;
             // xx/xx/2013
             String ouputDir = Util.p.getProperty("dir_output") + dt.substring(0, 4);
             try {
                 String cacheKey = type + "_" + dimension;
-                BaseData data = (BaseData)cache.get(cacheKey, dimension);
+                BaseData data = cache.getBaseData(cacheKey);
                 data.setDateTime(dt);
                 long totalCount = qr.getResults().getNumFound();
                 long totalInc = totalCount - data.getTotal();
@@ -103,7 +103,7 @@ public class Statistics {
                 StringBuffer body = new StringBuffer();
                 int subCount = 0;
                 if (!"".equals(tableCol)) {
-                    subCount = data.createData(qr, tableCol, cache, dimension, body);
+                    subCount = data.createData(qr, tableCol, body);
                 }
                 if (!data.isPolluted()) {
                     // 不需要更新：标志串，文件版本号，偏移量
