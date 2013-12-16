@@ -2,55 +2,55 @@ package com.jcm.statistics.data;
 
 import java.util.List;
 
-public class Data {
 
-	private String dateTime = null;
-	
-	private String name = null;
-	
-	private Long total = null;
-	
-	private Long increment = null;
-	
-	private List<Data> subData = null;
+public class Data implements Cloneable {
 
-	public String getDateTime() {
-		return dateTime;
-	}
+    private String dateTime = null;
 
-	public void setDateTime(String dateTime) {
-		this.dateTime = dateTime;
-	}
+    private DataItem item = null;
 
-	public String getName() {
-		return name;
-	}
+    public DataItem getItem() {
+        return item;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setItem(DataItem item) {
+        this.item = item;
+    }
 
-	public Long getTotal() {
-		return total;
-	}
+    public String getDateTime() {
+        return dateTime;
+    }
 
-	public void setTotal(Long total) {
-		this.total = total;
-	}
+    public void setDateTime(String dateTime) {
+        this.dateTime = dateTime;
+    }
 
-	public Long getIncrement() {
-		return increment;
-	}
+    public void wrapData(List<String> dataList, Data originalData, boolean isStart) {
+        dateTime = dataList.remove(0);
+        item = new DataItem();
+        item.wrapItems(dataList);
+        if (isStart) item.resetInc(originalData.getItem());
+    }
 
-	public void setIncrement(Long increment) {
-		this.increment = increment;
-	}
+    public Data clone() throws CloneNotSupportedException {
+        // deep clone
+        Data d = new Data();
+        d.setItem(item.clone());
+        return d;
+    }
+    
+    public Data ShadowClone(String dateTime) throws CloneNotSupportedException {
+        Data d = (Data)super.clone();
+        d.setDateTime(dateTime);
+        return d;
+    }
+    
+    public void setPeriodData(String dateTime, Data sData, Data fData) {
 
-	public List<Data> getSubData() {
-		return subData;
-	}
-
-	public void setSubData(List<Data> subData) {
-		this.subData = subData;
-	}
+        this.dateTime = dateTime;
+        if (fData.getItem() != null) {
+            item = new DataItem();
+            item.setPeriodData(sData.getItem(), fData.getItem());
+        }
+    }
 }
