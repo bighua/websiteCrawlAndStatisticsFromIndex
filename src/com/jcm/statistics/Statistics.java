@@ -26,8 +26,6 @@ public class Statistics {
     
     private SolrDb sd = null;
     
-    private String startFlg = Util.START_FLG;
-    
     public Statistics() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
         // 缓存初期化
         String[] types = Util.p.getProperty("table").split("/");
@@ -40,11 +38,12 @@ public class Statistics {
     }
     
     class TimerStatistics extends TimerTask {
+        private String startFlg = Util.START_FLG + Util.LINE_SEPARATOR;
 
         public void run() {
             try {
-                String[] types = Util.p.getProperty("table").split("/");
-                String[] dimension = Util.p.getProperty("dimension").split("/");
+                String[] types = Util.p.getProperty("table").toLowerCase().split("/");
+                String[] dimension = Util.p.getProperty("dimension").toLowerCase().split("/");
                 String now = Util.getRemoteTime().replaceAll("\n", "");
                 for (String d : dimension) {
                     String[] cols = Util.p.getProperty("col_" + d).split("/");
@@ -100,6 +99,7 @@ public class Statistics {
                 }
                 long vol = 0L;
                 String head = "";
+                String tail = "";
                 StringBuffer body = new StringBuffer();
                 int subCount = 0;
                 if (!"".equals(tableCol)) {
@@ -107,10 +107,12 @@ public class Statistics {
                 }
                 if (!data.isPolluted()) {
                     // 不需要更新：标志串，文件版本号，偏移量
-                    body = new StringBuffer(Util.NO_UPDATE).append(Util.LINE_SEPARATOR);
+                    body = new StringBuffer(Util.NO_UPDATE).append(",").append(dt).append(Util.LINE_SEPARATOR);
                 } else {
                     // 头数据：时间，总量，增量，子分类个数
-                    head = dt + "," + totalCount + "," + totalInc + "," + subCount + Util.LINE_SEPARATOR;
+                    head = dt + Util.LINE_SEPARATOR;
+                    head += dimension + "," + totalCount + "," + totalInc + "," + subCount + Util.LINE_SEPARATOR;
+                    tail = Util.TAIL_FLG + Util.LINE_SEPARATOR;
                     vol += head.getBytes().length;
                 }
                 vol += body.length() * 2;
@@ -123,11 +125,13 @@ public class Statistics {
                     version++;
                     f = new File(ouputDir, verKey + "_" + version);
                     cache.setVersion(verKey, version);
+                    startFlg = Util.START_FLG + Util.LINE_SEPARATOR;
                 }
                 writer = new BufferedWriter(new FileWriter(f, true));
                 writer.write(startFlg);
                 writer.write(head);
                 writer.write(body.toString());
+                writer.write(tail);
                 writer.flush();
                 cache.resetPollutedFlg(cacheKey);
             } finally {
