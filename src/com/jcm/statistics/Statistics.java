@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 
 import com.jcm.solrj.ext.SolrDb;
@@ -16,7 +15,6 @@ import com.jcm.solrj.ext.query.QueryParams;
 import com.jcm.solrj.ext.query.params.FacetingParamsComp;
 import com.jcm.statistics.bean.BaseData;
 import com.jcm.statistics.cache.Cache;
-import com.jcraft.jsch.JSchException;
 
 public class Statistics {
 
@@ -73,11 +71,10 @@ public class Statistics {
                     }
                 }
                 startFlg = "";
-            } catch (IOException |  JSchException | InterruptedException | SolrServerException  e) {
-                e.printStackTrace();
+            } catch (Exception e) {
                 System.out.println("exception happens in execution, process exit!");
                 timer.cancel();
-            }
+			}
         }
         
         public void outputData(String dt, String type, QueryResponse qr, String tableCol, String dimension) 
@@ -145,9 +142,8 @@ public class Statistics {
     public static void main(String[] args) {
         try {
             new Statistics();
-        } catch (IOException |  InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            System.out.println("error occurs when prepare the cache.");
-            e.printStackTrace();
-        }
+        } catch (Exception e) {
+            System.out.println("error occurs when prepare the initialize the process.");
+		}
     }
 }

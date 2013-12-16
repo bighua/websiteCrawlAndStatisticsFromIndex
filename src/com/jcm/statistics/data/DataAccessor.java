@@ -5,36 +5,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import com.jcm.statistics.Util;
-import com.jcm.statistics.bean.Model;
 
 public class DataAccessor {
 
-    public static void main(String[] args) {
-        DataAccessor da = new DataAccessor();
-        try {
-//            List<Data> ls = da.getData("20131216", "img", "site_model");
-            Data data = da.getDailyData("20131216", "img", "site_model");
-            System.out.println();
-//            Data data = new Data();
-//            data.setDateTime("123");
-//            Map<String, DataItem> m = new HashMap<String, DataItem>();
-//            DataItem d = new DataItem();
-//            d.setName("123");
-//            m.put("12", d);
-//            data.setItem(m);
-//            Data cloneData = data.clone();
-//            System.out.println();
-        } catch (CloneNotSupportedException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
     public List<Data> getData(String date, String type, String dimension) 
             throws IOException, CloneNotSupportedException {
         List<Data> dataList = new ArrayList<Data>();
@@ -57,7 +34,6 @@ public class DataAccessor {
                 boolean isStart = false;
                 while ((line = br.readLine()) != null) {
                     if (line.startsWith(Util.NO_UPDATE)) {
-                        // TODO 拷贝后，增量重置为0
                         dataList.add(copyData.ShadowClone(line.split(",")[1]));
                     } else if (Util.START_FLG.equals(line)) {
                         // 第一个start

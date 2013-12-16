@@ -1,4 +1,4 @@
-<project name="model-test" default="test" basedir=".">
+<project name="carStatistics" default="package" basedir=".">
   <description>
     project description
   </description>
