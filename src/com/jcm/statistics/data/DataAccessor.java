@@ -14,8 +14,9 @@ public class DataAccessor {
 
     public List<Data> getData(String date, String type, String dimension) 
             throws IOException, CloneNotSupportedException {
+        
         List<Data> dataList = new ArrayList<Data>();
-
+        Util.initResource();
         BufferedReader br = null;
         String ouputDir = Util.p.getProperty("dir_output") + date.substring(0, 4);
         

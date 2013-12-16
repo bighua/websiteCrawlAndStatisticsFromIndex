@@ -1,6 +1,7 @@
 package com.jcm.statistics;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -10,6 +11,7 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.ztools.conf.Environment;
 
 public class Util {
 
@@ -23,13 +25,9 @@ public class Util {
 
     public static Properties p = new Properties();
     
-    static {
-        InputStream inputStream  = Util.class.getClassLoader().getResourceAsStream("conf/jcm.properties");
-        try {
-            p.load(inputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void initResource() throws IOException {
+        InputStream inputStream = new FileInputStream(new File(Environment.getContext()+"conf/jcm.properties"));
+        p.load(inputStream);
     }
     
     public static String getRemoteTime() throws JSchException, IOException, InterruptedException {

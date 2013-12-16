@@ -64,7 +64,7 @@ public class DataItem implements Cloneable {
     }
     
     public void resetInc(DataItem origin) {
-        increment = total - origin.getTotal();
+        increment = total - (origin == null ? 0 : origin.getTotal());
         if (subItems != null) {
             for (String key : subItems.keySet()) {
                 subItems.get(key).resetInc(origin.getSubItems().get(key));

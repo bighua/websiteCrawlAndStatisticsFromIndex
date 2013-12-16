@@ -2,8 +2,9 @@ package com.jcm.statistics;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,6 +27,7 @@ public class Statistics {
     
     public Statistics() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
         // 缓存初期化
+        Util.initResource();
         String[] types = Util.p.getProperty("table").split("/");
         String[] dimension = Util.p.getProperty("dimension").split("/");
         Long interval = Long.valueOf(Util.p.getProperty("interval"));
@@ -124,7 +126,7 @@ public class Statistics {
                     cache.setVersion(verKey, version);
                     startFlg = Util.START_FLG + Util.LINE_SEPARATOR;
                 }
-                writer = new BufferedWriter(new FileWriter(f, true));
+                writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, true), "UTF-8"));
                 writer.write(startFlg);
                 writer.write(head);
                 writer.write(body.toString());
