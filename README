@@ -1,1 +1,39 @@
 实时数据统计
+此模块提供两个功能：
+1.定时统计索引数据
+2.索引数据访问接口
+
+1.定时统计索引数据
+根据配置文件（conf/jcm.properties）的配置，定时统计某个类型（新闻，图片，视频，口碑）的某个维度（网址，车型，网址+车型，等）的数据，
+以自然日为单位生成数据文件（文件名格式：新闻_网址_车型_20131217_0）。
+
+dimension=model/site_model
+table=news/img/video/praise
+col_model=urlmodelcom/model
+col_site_model=sitename,urlmodelcom/sitecom,model/sitenamecom/sitename
+
+2.索引数据访问接口
+数据访问接口通过jcm-rmi组件（http://source.8drive.cn/jcm-component/jcm-rmi/wikis/home）服务端提供，
+客户端调用请参照wiki.
+
+目前提供了两个接口：
+取得每个统计时间点的数据List
+public List<Data> getData(String date, String type, String dimension)
+参数：
+String date：自然日（格式：YYYYMMDD）
+String type：类型（news：新闻，img：图片，video：视频，praise：口碑）中的一种
+String dimension：统计维度（site:网址，model:车型，site_model:网址+车型）中的一种
+
+取得单个自然日的数据
+public Data getDailyData(String date, String type, String dimension)
+参数：与getData相同
+返回的数据结构格式如下：
+Data
+|——————String dateTime 统计时间点
+|——————DataItem item
+
+DataItem
+|——————String name 数据名称
+|——————Long total 数据总量
+|——————Long increment 数据增量
+|——————Map<String, DataItem> subItems 子数据（非多级统计（统计维度为site_model时，为二级统计）时为null）
