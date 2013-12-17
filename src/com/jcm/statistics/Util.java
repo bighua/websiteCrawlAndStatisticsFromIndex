@@ -19,6 +19,8 @@ public class Util {
     
     public static String LINE_SEPARATOR = System.getProperty("line.separator");
     
+    public static String PATH_SEPARATOR = System.getProperty("path.separator");
+    
     public static String START_FLG = "_S_";
     
     public static String TAIL_FLG = "_T_";
@@ -83,5 +85,16 @@ public class Util {
         String dir = prefix.substring(i + 1, i + 5);
         while (new File(p.getProperty("dir_output") + dir, prefix + "_" + version).exists()) version++;
         return version == 0 ? 0 : --version;
+    }
+    
+    public static String getDirPath(String... dir) {
+        StringBuffer path = new StringBuffer();
+        for (String s : dir) {
+            path.append(s);
+            if (!s.endsWith(PATH_SEPARATOR)) {
+                path.append(PATH_SEPARATOR);
+            }
+        }
+        return path.toString();
     }
 }

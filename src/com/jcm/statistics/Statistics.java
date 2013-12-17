@@ -76,7 +76,7 @@ public class Statistics {
             } catch (Exception e) {
                 System.out.println("exception happens in execution, process exit!");
                 timer.cancel();
-			}
+            }
         }
         
         public void outputData(String dt, String type, QueryResponse qr, String tableCol, String dimension) 
@@ -104,27 +104,27 @@ public class Statistics {
                 if (!"".equals(tableCol)) {
                     subCount = data.createData(qr, tableCol, body);
                 }
-                if (!data.isPolluted()) {
-                    // 不需要更新：标志串，文件版本号，偏移量
-                    body = new StringBuffer(Util.NO_UPDATE).append(",").append(dt).append(Util.LINE_SEPARATOR);
-                } else {
+                // 文件名:news_site_model_20131210_0
+                String verKey = cacheKey + "_" + dt.substring(0, 8);
+                int version = cache.getVersion(verKey);
+                File f = new File(ouputDir, verKey + "_" + version);
+                // 新的一天开始的第一条数据或者有更新的数据完整记录
+                if ((version == 0 && f.length() == 0) || data.isPolluted()) {
                     // 头数据：时间，总量，增量，子分类个数
                     head = dt + Util.LINE_SEPARATOR;
                     head += dimension + "," + totalCount + "," + totalInc + "," + subCount + Util.LINE_SEPARATOR;
                     tail = Util.TAIL_FLG + Util.LINE_SEPARATOR;
                     vol += head.getBytes().length;
+                } else {
+                    // 不需要更新：标志串，时间
+                    body = new StringBuffer(Util.NO_UPDATE).append(",").append(dt).append(Util.LINE_SEPARATOR);
                 }
                 vol += body.length() * 2;
-                // 文件名:news_site_model_20131210_0
-                String verKey = cacheKey + "_" + dt.substring(0, 8);
-                int version = cache.getVersion(verKey);
-                File f = new File(ouputDir, verKey + "_" + version);
                 long maxSize = Long.valueOf(Util.p.getProperty("maxsize"));
                 if ((maxSize - f.length()) < vol) {
                     version++;
                     f = new File(ouputDir, verKey + "_" + version);
                     cache.setVersion(verKey, version);
-                    startFlg = Util.START_FLG + Util.LINE_SEPARATOR;
                 }
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, true), "UTF-8"));
                 writer.write(startFlg);
@@ -146,6 +146,6 @@ public class Statistics {
             new Statistics();
         } catch (Exception e) {
             System.out.println("error occurs when prepare the initialize the process.");
-		}
+        }
     }
 }
