@@ -19,7 +19,7 @@ public class Util {
     
     public static String LINE_SEPARATOR = System.getProperty("line.separator");
     
-    public static String PATH_SEPARATOR = System.getProperty("path.separator");
+    public static String FILE_SEPARATOR = System.getProperty("file.separator");
     
     public static String START_FLG = "_S_";
     
@@ -91,8 +91,8 @@ public class Util {
         StringBuffer path = new StringBuffer();
         for (String s : dir) {
             path.append(s);
-            if (!s.endsWith(PATH_SEPARATOR)) {
-                path.append(PATH_SEPARATOR);
+            if (!s.endsWith(FILE_SEPARATOR)) {
+                path.append(FILE_SEPARATOR);
             }
         }
         return path.toString();

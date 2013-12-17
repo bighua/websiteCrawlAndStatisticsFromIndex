@@ -1,12 +1,18 @@
 package com.jcm.statistics.data;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DataItem implements Cloneable {
+public class DataItem implements Cloneable,Serializable {
 
-    private String name = null;
+    /**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = -1500862404995003146L;
+
+	private String name = null;
     
     private Long total = 0L;
     

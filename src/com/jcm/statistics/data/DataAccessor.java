@@ -10,15 +10,14 @@ import java.util.List;
 
 import com.jcm.statistics.Util;
 
-public class DataAccessor {
+public class DataAccessor implements IDataAccessor {
 
-    public List<Data> getData(String date, String type, String dimension, String dir) 
+    public List<Data> getData(String date, String type, String dimension) 
             throws IOException, CloneNotSupportedException {
         
         List<Data> dataList = new ArrayList<Data>();
-        Util.initResource();
         BufferedReader br = null;
-        String ouputDir = Util.getDirPath(dir, date.substring(0, 4));
+        String ouputDir = Util.getDirPath(Util.p.getProperty("dir_output"), date.substring(0, 4));
         
         int version = 0;
         Data origin = null;
@@ -74,8 +73,8 @@ public class DataAccessor {
      * @throws CloneNotSupportedException 
      * @throws IOException 
      */
-    public Data getDailyData(String date, String type, String dimension, String dir) throws IOException, CloneNotSupportedException {
-        List<Data> allData = getData(date, type, dimension, dir);
+    public Data getDailyData(String date, String type, String dimension) throws IOException, CloneNotSupportedException {
+        List<Data> allData = getData(date, type, dimension);
         Data dailyData = null;
         if (allData.size() != 0) {
             Data sData = allData.get(0);

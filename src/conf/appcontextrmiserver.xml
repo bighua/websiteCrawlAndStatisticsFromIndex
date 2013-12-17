@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+   "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+    <!-- 定义远程对象path -->
+    <bean id="dataAccessor" class="com.jcm.statistics.data.DataAccessor"/>
+   <!-- 定义服务 -->
+    <bean id="dataAccessorService"
+        class="com.jcm.remoting.JcmRmiServiceExporter" lazy-init="true">
+        <property name="serviceName"><value>dataAccessor</value></property>
+        <property name="service"><ref bean="dataAccessor"/></property>
+        <property name="serviceInterface"><value>com.jcm.statistics.data.IDataAccessor</value></property>
+        <!-- 查找端口 -->
+        <property name="registryPort"><value>1200</value></property>
+        <!-- 数据端口 -->
+        <property name="servicePort"><value>1201</value></property>
+    </bean>
+</beans>

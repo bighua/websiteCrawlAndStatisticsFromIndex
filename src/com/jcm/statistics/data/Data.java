@@ -1,11 +1,17 @@
 package com.jcm.statistics.data;
 
+import java.io.Serializable;
 import java.util.List;
 
 
-public class Data implements Cloneable {
+public class Data implements Cloneable,Serializable {
 
-    private String dateTime = null;
+    /**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = -3907405035422763905L;
+
+	private String dateTime = null;
 
     private DataItem item = null;
 
