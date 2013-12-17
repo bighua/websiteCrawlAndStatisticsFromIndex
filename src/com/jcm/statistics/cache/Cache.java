@@ -1,6 +1,5 @@
 package com.jcm.statistics.cache;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,12 +19,6 @@ public class Cache {
      * 车型：车型ID
      */
     private Map<String, Long> modelId = new HashMap<String, Long>();
-    
-    public Cache(String[] types, String[] dimension) throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        for (String d : dimension) {
-            init(types, d);
-        }
-    }
     
     public BaseData getBaseData(String key) {
         BaseData data = baseData.get(key);
@@ -56,12 +49,5 @@ public class Cache {
     public void resetPollutedFlg(String key) {
         BaseData data = baseData.get(key);
         data.resetPolluted();
-    }
-    
-    private void init(String[] types, String dimension) throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        String[] models = new String(Util.p.getProperty("models").getBytes("ISO8859-1"), "UTF-8").split(",");
-        for (int i = 0; i < models.length; i++) {
-            modelId.put(models[i], Long.valueOf(models[++i]));
-        }
     }
 }

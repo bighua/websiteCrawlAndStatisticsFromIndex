@@ -9,13 +9,14 @@ import com.jcm.statistics.Util;
 
 public class DataServer {
 
-	public static void main(String[] args) {
-		try {
-			Util.initResource();
-		} catch (IOException e) {
-		}
-        startDataAccessorService();
-	}
+    public static void main(String[] args) {
+        try {
+            Util.initResource();
+            startDataAccessorService();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void startDataAccessorService(){
         /*ApplicationContext getBean lazy-init = false lazy load*/

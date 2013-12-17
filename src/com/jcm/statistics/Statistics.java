@@ -28,10 +28,8 @@ public class Statistics {
     public Statistics() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
         // 缓存初期化
         Util.initResource();
-        String[] types = Util.p.getProperty("table").split("/");
-        String[] dimension = Util.p.getProperty("dimension").split("/");
         Long interval = Long.valueOf(Util.p.getProperty("interval"));
-        cache = new Cache(types, dimension);
+        cache = new Cache();
         timer = new Timer();
         sd = new SolrDb(Util.p.getProperty("solr_server"));
         timer.schedule(new TimerStatistics(), 0, interval);
@@ -75,6 +73,7 @@ public class Statistics {
                 startFlg = "";
             } catch (Exception e) {
                 System.out.println("exception happens in execution, process exit!");
+                e.printStackTrace();
                 timer.cancel();
             }
         }
