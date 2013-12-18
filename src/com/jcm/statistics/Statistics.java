@@ -42,7 +42,7 @@ public class Statistics {
             try {
                 String[] types = Util.p.getProperty("table").toLowerCase().split("/");
                 String[] dimension = Util.p.getProperty("dimension").toLowerCase().split("/");
-                String now = Util.getRemoteTime().replaceAll("\n", "");
+                String now = Util.getRemoteTime().replaceAll("\r", "").replaceAll("\n", "");
                 for (String d : dimension) {
                     String[] cols = Util.p.getProperty("col_" + d).split("/");
                     for (int i = 0; i < types.length; i++) {
@@ -118,21 +118,33 @@ public class Statistics {
                     vol += head.getBytes().length;
                     // 结尾标志，文件番号，偏移量
                     tail = Util.TAIL_FLG + "," + version + "," + offset;
+                    vol += body.length() * 2 + tail.getBytes().length;
+                    // 新文件
+                    if ((maxSize - f.length()) < vol) {
+                        offset = "0";
+                        // 更换文件番号和偏移量
+                        tail = tail.replace(tail.substring(tail.lastIndexOf("," + version + ",")), "," + (version + 1) + ",0");
+                        version++;
+                        f = new File(ouputDir, verKey + "_" + version);
+                        cache.setVersion(verKey, version);
+                    }
                 } else {
-                    body.delete(0, body.length());
                     offset = data.getOffset();
                     // 不需要更新：无更新标志，时间，文件番号，偏移量
                     tail = Util.NO_UPDATE + "," + dt + "," + version + "," + offset;
-                }
-                vol += body.length() * 2 + tail.getBytes().length;
-                if ((maxSize - f.length()) < vol) {
-                    tail = tail.replace(tail.substring(tail.lastIndexOf(',') + 1), "0");
-                    if (body.length() != 0) {
-                        tail = tail.replace("," + version + ",", "," + (version + 1) + ",");
+                    vol += tail.getBytes().length;
+                    // 不需要分割文件时
+                    if ((maxSize - f.length()) < vol) {
+                        offset = "0";
+                        version++;
+                        head = dt + Util.LINE_SEPARATOR;
+                        head += dimension + "," + totalCount + "," + totalInc + "," + subCount + Util.LINE_SEPARATOR;
+                        tail = Util.TAIL_FLG + "," + version + "," + offset;
+                        f = new File(ouputDir, verKey + "_" + version);
+                        cache.setVersion(verKey, version);
+                    } else {
+                        body.delete(0, body.length());
                     }
-                    version++;
-                    f = new File(ouputDir, verKey + "_" + version);
-                    cache.setVersion(verKey, version);
                 }
                 data.setOffset(offset);
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, true), "UTF-8"));
