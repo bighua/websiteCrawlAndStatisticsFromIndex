@@ -113,7 +113,7 @@ public class Statistics {
                     head = dt + Util.LINE_SEPARATOR;
                     head += dimension + "," + totalCount + "," + totalInc + "," + subCount + Util.LINE_SEPARATOR;
                     tail = Util.TAIL_FLG + Util.LINE_SEPARATOR;
-                    vol += head.getBytes().length;
+                    vol += head.getBytes().length + tail.getBytes().length;
                 } else {
                     // 不需要更新：标志串，时间
                     body = new StringBuffer(Util.NO_UPDATE).append(",").append(dt).append(Util.LINE_SEPARATOR);
