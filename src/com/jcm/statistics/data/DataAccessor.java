@@ -2,8 +2,9 @@ package com.jcm.statistics.data;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class DataAccessor implements IDataAccessor {
             File f = new File(ouputDir, type + "_" + dimension + "_" + date + "_" + version);
             if (!f.exists()) break;
             try {
-                br = new BufferedReader(new FileReader(f));
+                br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
                 version++;
                 String line = null;
                 List<String> items = new LinkedList<String>();
