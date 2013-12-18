@@ -83,6 +83,7 @@ public class Statistics {
             BufferedWriter writer = null;
             // xx/xx/2013
             String ouputDir = Util.p.getProperty("dir_output") + dt.substring(0, 4);
+            long maxSize = Long.valueOf(Util.p.getProperty("maxsize"));
             try {
                 String cacheKey = type + "_" + dimension;
                 BaseData data = cache.getBaseData(cacheKey);
@@ -107,29 +108,38 @@ public class Statistics {
                 String verKey = cacheKey + "_" + dt.substring(0, 8);
                 int version = cache.getVersion(verKey);
                 File f = new File(ouputDir, verKey + "_" + version);
+                String offset = String.valueOf(f.length());
                 // 新的一天开始的第一条数据或者有更新的数据完整记录
                 if ((version == 0 && f.length() == 0) || data.isPolluted()) {
-                    // 头数据：时间，总量，增量，子分类个数
+                    // 头数据：时间，
+                    //      总量，增量，子分类个数
                     head = dt + Util.LINE_SEPARATOR;
                     head += dimension + "," + totalCount + "," + totalInc + "," + subCount + Util.LINE_SEPARATOR;
-                    tail = Util.TAIL_FLG + Util.LINE_SEPARATOR;
-                    vol += head.getBytes().length + tail.getBytes().length;
+                    vol += head.getBytes().length;
+                    // 结尾标志，文件番号，偏移量
+                    tail = Util.TAIL_FLG + "," + version + "," + offset;
                 } else {
-                    // 不需要更新：标志串，时间
-                    body = new StringBuffer(Util.NO_UPDATE).append(",").append(dt).append(Util.LINE_SEPARATOR);
+                    body.delete(0, body.length());
+                    offset = data.getOffset();
+                    // 不需要更新：无更新标志，时间，文件番号，偏移量
+                    tail = Util.NO_UPDATE + "," + dt + "," + version + "," + offset;
                 }
-                vol += body.length() * 2;
-                long maxSize = Long.valueOf(Util.p.getProperty("maxsize"));
+                vol += body.length() * 2 + tail.getBytes().length;
                 if ((maxSize - f.length()) < vol) {
+                    tail = tail.replace(tail.substring(tail.lastIndexOf(',') + 1), "0");
+                    if (body.length() != 0) {
+                        tail = tail.replace("," + version + ",", "," + (version + 1) + ",");
+                    }
                     version++;
                     f = new File(ouputDir, verKey + "_" + version);
                     cache.setVersion(verKey, version);
                 }
+                data.setOffset(offset);
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, true), "UTF-8"));
                 writer.write(startFlg);
                 writer.write(head);
                 writer.write(body.toString());
-                writer.write(tail);
+                writer.write(tail + Util.LINE_SEPARATOR);
                 writer.flush();
                 cache.resetPollutedFlg(cacheKey);
             } finally {
