@@ -97,6 +97,7 @@ public class DataItem implements Cloneable,Serializable {
         Long sTotal = sData == null ? 0 : sData.getTotal();
         Long fTotal = fData.getTotal();
         total = fTotal;
+        name = fData.getName();
         increment = fTotal - sTotal + (sData == null ? 0 : sData.getIncrement());
         if (fData.getSubItems() != null) {
             subItems = new HashMap<String, DataItem>();
