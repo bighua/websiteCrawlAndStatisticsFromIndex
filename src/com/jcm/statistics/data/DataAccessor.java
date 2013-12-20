@@ -5,6 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,14 +79,97 @@ public class DataAccessor implements IDataAccessor {
      * @throws IOException 
      */
     public Data getDailyData(String date, String type, String dimension) throws IOException, CloneNotSupportedException {
-        List<Data> allData = getData(date, type, dimension);
         Data dailyData = null;
-        if (allData.size() != 0) {
-            Data sData = allData.get(0);
-            Data fData = allData.get(allData.size() - 1);
+        String prefix = type + "_" + dimension + "_" + date;
+        String ouputDir = Util.getDirPath(Util.p.getProperty("dir_output"), date.substring(0, 4));
+        File sf = new File(ouputDir, prefix + "_" + 0);
+        Data sData = getSData(sf);
+        if (sData != null) {
             dailyData = new Data();
+            int version = Util.getVersion(prefix);
+            File ff = new File(ouputDir, prefix + "_" + version);
+            Data fData = getFdata(ff);
             dailyData.setPeriodData(date, sData, fData);
         }
         return dailyData;
     }
+    
+    public static Data getSData(File f) throws IOException {
+
+        Data data = null;
+        BufferedReader br = null;
+        if (!f.exists()) return data;
+        data = new Data();
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
+            String line = null;
+            List<String> items = new LinkedList<String>();
+            while (!(line = br.readLine()).startsWith(Util.TAIL_FLG)) {
+                if (!Util.START_FLG.equals(line)) items.add(line);
+            }
+            data.wrapData(items, null, false);
+            return data;
+        } finally {
+            if (br != null) {
+                br.close();
+            }
+        }
+    }
+
+    public static Data getFdata(File f) throws IOException {  
+
+        Data data = new Data();
+        FileChannel fcin = null;
+        RandomAccessFile rf = null;
+        try {
+            rf = new RandomAccessFile(f, "r");
+            fcin = rf.getChannel();  
+            int tailSize = Integer.valueOf(Util.p.getProperty("tailSize"));
+            ByteBuffer rBuffer = ByteBuffer.allocate(tailSize);
+            Charset charset = Charset.forName("UTF-8");
+            String tail = null;
+            long offset = 0;
+            int size = 1000;
+            // 查找偏移量和大小
+            if (fcin.read(rBuffer, fcin.size() - tailSize) != -1) {  
+                rBuffer.rewind();
+                tail = charset.decode(rBuffer).toString();
+                int start = tail.indexOf(Util.NO_UPDATE);
+                if (start != -1) {
+                    String[] ts = Util.trim(tail.substring(start)).split(",");
+                    offset = Long.valueOf(ts[2]);
+                } else if ((start = tail.indexOf(Util.TAIL_FLG)) != -1) {
+                    String[] ts = Util.trim(tail.substring(start)).split(",");
+                    offset = Long.valueOf(ts[1]);
+                }
+                rBuffer.clear();
+            }
+            // 查找数据
+            rBuffer = ByteBuffer.allocate(size);
+            StringBuffer sb = new StringBuffer();
+            while (fcin.read(rBuffer, offset) != -1) {  
+                rBuffer.rewind();
+                String dataStr = charset.decode(rBuffer).toString();
+                int index = dataStr.indexOf(Util.TAIL_FLG);
+                if (index > 0) {
+                    sb.append(dataStr.substring(0, index - 2));
+                    break;
+                } else {
+                    sb.append(dataStr);
+                }
+                rBuffer.clear();
+                offset += size;
+            }
+            String[] lines = sb.toString().split(Util.LINE_SEPARATOR);
+            List<String> items = new LinkedList<String>();
+            for (String l : lines) {
+                if (!Util.START_FLG.equals(l)) items.add(l);
+            }
+            data.wrapData(items, null, false);
+            return data;
+        } finally {
+            rf.close();
+            fcin.close();
+        }
+    }  
 }

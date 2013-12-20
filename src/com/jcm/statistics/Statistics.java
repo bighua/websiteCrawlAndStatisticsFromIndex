@@ -42,7 +42,7 @@ public class Statistics {
             try {
                 String[] types = Util.p.getProperty("table").toLowerCase().split("/");
                 String[] dimension = Util.p.getProperty("dimension").toLowerCase().split("/");
-                String now = Util.getRemoteTime().replaceAll("\r", "").replaceAll("\n", "");
+                String now = Util.getRemoteTime();
                 for (String d : dimension) {
                     String[] cols = Util.p.getProperty("col_" + d).split("/");
                     for (int i = 0; i < types.length; i++) {
@@ -116,30 +116,32 @@ public class Statistics {
                     head = dt + Util.LINE_SEPARATOR;
                     head += dimension + "," + totalCount + "," + totalInc + "," + subCount + Util.LINE_SEPARATOR;
                     vol += head.getBytes().length;
-                    // 结尾标志，文件番号，偏移量
-                    tail = Util.TAIL_FLG + "," + version + "," + offset;
-                    vol += body.length() * 2 + tail.getBytes().length;
+                    vol += body.length() * 2;
+                    // 结尾标志，偏移量
+                    tail = Util.TAIL_FLG + "," + offset;
+                    vol += tail.getBytes().length;
                     // 新文件
                     if ((maxSize - f.length()) < vol) {
                         offset = "0";
-                        // 更换文件番号和偏移量
-                        tail = tail.replace(tail.substring(tail.lastIndexOf("," + version + ",")), "," + (version + 1) + ",0");
+                        // 更换偏移量
+                        tail = tail.replace(tail.substring(tail.lastIndexOf(',') + 1), offset);
                         version++;
                         f = new File(ouputDir, verKey + "_" + version);
                         cache.setVersion(verKey, version);
                     }
                 } else {
                     offset = data.getOffset();
-                    // 不需要更新：无更新标志，时间，文件番号，偏移量
-                    tail = Util.NO_UPDATE + "," + dt + "," + version + "," + offset;
+                    // 不需要更新：无更新标志，时间，偏移量
+                    tail = Util.NO_UPDATE + "," + dt + "," + offset;
                     vol += tail.getBytes().length;
-                    // 不需要分割文件时
+                    // 需要分割文件时
                     if ((maxSize - f.length()) < vol) {
                         offset = "0";
                         version++;
                         head = dt + Util.LINE_SEPARATOR;
                         head += dimension + "," + totalCount + "," + totalInc + "," + subCount + Util.LINE_SEPARATOR;
-                        tail = Util.TAIL_FLG + "," + version + "," + offset;
+                        // 结尾标志，偏移量，大小
+                        tail = Util.TAIL_FLG + "," + offset;
                         f = new File(ouputDir, verKey + "_" + version);
                         cache.setVersion(verKey, version);
                     } else {
