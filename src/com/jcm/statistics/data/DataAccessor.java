@@ -129,7 +129,7 @@ public class DataAccessor implements IDataAccessor {
             Charset charset = Charset.forName("UTF-8");
             String tail = null;
             long offset = 0;
-            int size = 1000;
+            int size = 3000;
             // 查找偏移量和大小
             if (fcin.read(rBuffer, fcin.size() - tailSize) != -1) {  
                 rBuffer.rewind();
@@ -146,21 +146,20 @@ public class DataAccessor implements IDataAccessor {
             }
             // 查找数据
             rBuffer = ByteBuffer.allocate(size);
-            StringBuffer sb = new StringBuffer();
+            String allLines = "";
             while (fcin.read(rBuffer, offset) != -1) {  
                 rBuffer.rewind();
                 String dataStr = charset.decode(rBuffer).toString();
                 int index = dataStr.indexOf(Util.TAIL_FLG);
                 if (index > 0) {
-                    sb.append(dataStr.substring(0, index - 2));
+                    allLines = dataStr.substring(0, index - 2);
                     break;
                 } else {
-                    sb.append(dataStr);
+                    size += size;
+                    rBuffer = ByteBuffer.allocate(size);
                 }
-                rBuffer.clear();
-                offset += size;
             }
-            String[] lines = sb.toString().split(Util.LINE_SEPARATOR);
+            String[] lines = allLines.split(Util.LINE_SEPARATOR);
             List<String> items = new LinkedList<String>();
             for (String l : lines) {
                 if (!Util.START_FLG.equals(l)) items.add(l);
