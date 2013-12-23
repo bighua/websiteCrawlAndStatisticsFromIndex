@@ -123,8 +123,8 @@ public class DataAccessor implements IDataAccessor {
         RandomAccessFile rf = null;
         try {
             rf = new RandomAccessFile(f, "r");
-            fcin = rf.getChannel();  
-            int tailSize = Integer.valueOf(Util.p.getProperty("tailSize"));
+            fcin = rf.getChannel();
+            int tailSize = 40;
             ByteBuffer rBuffer = ByteBuffer.allocate(tailSize);
             Charset charset = Charset.forName("UTF-8");
             String tail = null;
