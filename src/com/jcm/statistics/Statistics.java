@@ -42,7 +42,7 @@ public class Statistics {
             try {
                 String[] types = Util.p.getProperty("table").toLowerCase().split("/");
                 String[] dimension = Util.p.getProperty("dimension").toLowerCase().split("/");
-                String now = Util.getRemoteTime().replaceAll("\n", "");
+                String now = Util.getRemoteTime();
                 for (String d : dimension) {
                     String[] cols = Util.p.getProperty("col_" + d).split("/");
                     for (int i = 0; i < types.length; i++) {
@@ -83,6 +83,7 @@ public class Statistics {
             BufferedWriter writer = null;
             // xx/xx/2013
             String ouputDir = Util.p.getProperty("dir_output") + dt.substring(0, 4);
+            long maxSize = Long.valueOf(Util.p.getProperty("maxsize"));
             try {
                 String cacheKey = type + "_" + dimension;
                 BaseData data = cache.getBaseData(cacheKey);
@@ -107,29 +108,52 @@ public class Statistics {
                 String verKey = cacheKey + "_" + dt.substring(0, 8);
                 int version = cache.getVersion(verKey);
                 File f = new File(ouputDir, verKey + "_" + version);
+                String offset = String.valueOf(f.length());
                 // 新的一天开始的第一条数据或者有更新的数据完整记录
                 if ((version == 0 && f.length() == 0) || data.isPolluted()) {
-                    // 头数据：时间，总量，增量，子分类个数
+                    // 头数据：时间，
+                    //      总量，增量，子分类个数
                     head = dt + Util.LINE_SEPARATOR;
                     head += dimension + "," + totalCount + "," + totalInc + "," + subCount + Util.LINE_SEPARATOR;
-                    tail = Util.TAIL_FLG + Util.LINE_SEPARATOR;
-                    vol += head.getBytes().length + tail.getBytes().length;
+                    vol += head.getBytes().length;
+                    vol += body.length() * 2;
+                    // 结尾标志，偏移量
+                    tail = Util.TAIL_FLG + "," + offset;
+                    vol += tail.getBytes().length;
+                    // 新文件
+                    if ((maxSize - f.length()) < vol) {
+                        offset = "0";
+                        // 更换偏移量
+                        tail = tail.replace(tail.substring(tail.lastIndexOf(',') + 1), offset);
+                        version++;
+                        f = new File(ouputDir, verKey + "_" + version);
+                        cache.setVersion(verKey, version);
+                    }
                 } else {
-                    // 不需要更新：标志串，时间
-                    body = new StringBuffer(Util.NO_UPDATE).append(",").append(dt).append(Util.LINE_SEPARATOR);
+                    offset = data.getOffset();
+                    // 不需要更新：无更新标志，时间，偏移量
+                    tail = Util.NO_UPDATE + "," + dt + "," + offset;
+                    vol += tail.getBytes().length;
+                    // 需要分割文件时
+                    if ((maxSize - f.length()) < vol) {
+                        offset = "0";
+                        version++;
+                        head = dt + Util.LINE_SEPARATOR;
+                        head += dimension + "," + totalCount + "," + totalInc + "," + subCount + Util.LINE_SEPARATOR;
+                        // 结尾标志，偏移量，大小
+                        tail = Util.TAIL_FLG + "," + offset;
+                        f = new File(ouputDir, verKey + "_" + version);
+                        cache.setVersion(verKey, version);
+                    } else {
+                        body.delete(0, body.length());
+                    }
                 }
-                vol += body.length() * 2;
-                long maxSize = Long.valueOf(Util.p.getProperty("maxsize"));
-                if ((maxSize - f.length()) < vol) {
-                    version++;
-                    f = new File(ouputDir, verKey + "_" + version);
-                    cache.setVersion(verKey, version);
-                }
+                data.setOffset(offset);
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, true), "UTF-8"));
                 writer.write(startFlg);
                 writer.write(head);
                 writer.write(body.toString());
-                writer.write(tail);
+                writer.write(tail + Util.LINE_SEPARATOR);
                 writer.flush();
                 cache.resetPollutedFlg(cacheKey);
             } finally {

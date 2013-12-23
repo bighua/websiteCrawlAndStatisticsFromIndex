@@ -17,8 +17,18 @@ public class BaseData {
     private String dateTime = null;
     
     private boolean isPolluted = false;
+    
+    private String offset = "0";
 
-    private Map<String, Long> dataCount = new HashMap<String, Long>();
+    public String getOffset() {
+		return offset;
+	}
+
+	public void setOffset(String offset) {
+		this.offset = offset;
+	}
+
+	private Map<String, Long> dataCount = new HashMap<String, Long>();
     
     private Map<String, BaseData> subData = new HashMap<String, BaseData>();
 

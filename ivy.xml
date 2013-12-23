@@ -1,5 +1,5 @@
 <ivy-module version="2.0">
-  <info organisation="com.jcm" module="carStatistics" revision="1.0">
+  <info organisation="com.jcm" module="carStatistics" revision="2.0">
     <ivyauthor name="Zhu Xianghua" url="mailto:zhuxianghua@8chedao.com" />
     <description>
       Describes the current module. This tag is the only one which can contain
@@ -35,6 +35,8 @@
     <dependency org="org.slf4j" name="slf4j-jdk14" rev="1.6.4" transitive="false"/>
     <dependency org="log4j" name="log4j" rev="1.2.17" transitive="false"/>
     
+    <!-- rmi -->
+    <dependency org="com.jcm" name="jcm-rmi" rev="1.0" transitive="true" />
     <!-- globe exclude -->
     <exclude org="*" ext="*" type="source" />
     <exclude org="*" ext="*" type="javadoc" />

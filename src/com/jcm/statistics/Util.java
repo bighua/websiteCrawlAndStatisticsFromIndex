@@ -35,7 +35,7 @@ public class Util {
     public static String getRemoteTime() throws JSchException, IOException, InterruptedException {
 
         String command = p.getProperty("date_cmd");
-        return execCmd(command);
+        return trim(execCmd(command));
     }
     
     public static String execCmd(String cmd) throws JSchException, IOException, InterruptedException {
@@ -96,5 +96,9 @@ public class Util {
             }
         }
         return path.toString();
+    }
+    
+    public static String trim(String s) {
+        return s.replaceAll(LINE_SEPARATOR, "").trim();
     }
 }
