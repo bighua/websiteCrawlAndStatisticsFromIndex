@@ -82,7 +82,7 @@ public class Statistics {
                 throws IOException {
             BufferedWriter writer = null;
             // xx/xx/2013
-            String ouputDir = Util.p.getProperty("dir_output") + dt.substring(0, 4);
+            String ouputDir = Util.getDirPath(Util.p.getProperty("dir_output"), dt.substring(0, 4));
             long maxSize = Long.valueOf(Util.p.getProperty("maxsize"));
             try {
                 String cacheKey = type + "_" + dimension;
