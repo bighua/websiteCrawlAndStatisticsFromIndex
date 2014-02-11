@@ -1,7 +1,6 @@
 package com.jcm.statistics;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -28,7 +27,7 @@ public class Util {
     public static Properties p = new Properties();
     
     public static void initResource() throws IOException {
-        InputStream inputStream = new FileInputStream(new File(Environment.getContext()+"conf/jcm.properties"));
+    	InputStream inputStream = Environment.findInputStreamByResource("conf/jcm.properties", Util.class);
         p.load(inputStream);
     }
     
