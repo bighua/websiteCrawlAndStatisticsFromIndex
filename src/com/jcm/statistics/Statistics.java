@@ -5,11 +5,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
 
+import com.jcm.monitor.bean.DataType;
+import com.jcm.monitor.bean.Pdu;
+import com.jcm.monitor.bean.ServiceType;
+import com.jcm.monitor.client.MonitorClient;
 import com.jcm.solrj.ext.SolrDb;
 import com.jcm.solrj.ext.TableAccessor;
 import com.jcm.solrj.ext.query.QueryParams;
@@ -71,11 +76,33 @@ public class Statistics {
                     }
                 }
                 startFlg = "";
+                sendMonitorInfo(now);
             } catch (Exception e) {
                 System.out.println("exception happens in execution, process exit!");
                 e.printStackTrace();
                 timer.cancel();
             }
+        }
+
+        private void sendMonitorInfo(String start) throws Exception {
+        	SimpleDateFormat format = new SimpleDateFormat ("yyyyMMddHHmmss");
+            long duration = format.parse(Util.getRemoteTime()).getTime() - format.parse(start).getTime();
+            MonitorClient client = new MonitorClient();
+            
+            Pdu pdu = new Pdu();
+
+            pdu.setTime(format.parse(start).getTime());
+            pdu.setServiceType(ServiceType.THREAD);
+
+            pdu.setPort(Integer.valueOf(Util.p.getProperty("registryPort")));
+            // 获取进程号
+            pdu.setTid(Thread.currentThread().getId());
+            // 连接的host
+//            pdu.setExtendInfo(csocket.getInetAddress().getHostAddress().getBytes());
+            pdu.setDataType(DataType.NUMBER);
+            pdu.setData(com.jcm.monitor.Util.longToBytes(duration));
+            String key = ServiceType.THREAD.name() + "://" + pdu.getHost() + ":" + pdu.getPid();
+            client.sendPdu(key, pdu, false);
         }
         
         public void outputData(String dt, String type, QueryResponse qr, String tableCol, String dimension) 
